@@ -1,16 +1,12 @@
-import express, { Response } from 'express';
+import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import employeeRouter from './src/routers/employeeRouter.js';
-import requestRouter from './src/routers/requestRouter.js';
-import publicHolidayRouter from './src/routers/publicHolidayRouter.js';
-import { connectToDatabase } from './src/utils/database.js';
+import employeeRouter from './src/routers/employeeRouter';
+import requestRouter from './src/routers/requestRouter';
+import publicHolidayRouter from './src/routers/publicHolidayRouter';
+import { connectToDatabase } from './src/utils/database';
 
 const PORT = 3033;
 const HOST = 'localhost';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -25,13 +21,6 @@ app.get('/', (req, res) => res.status(200).render('index'));
 
 app.get('*', (req, res)  => {
   res.status(404).render('error');
-});
-
-app.post('/set-database', (req, res) => {
-  const newDatabase = req.body.database;
-  process.env.SELECTED_DATABASE = newDatabase;
-  console.log("Selected database:", newDatabase);
-  res.redirect('/');
 });
 
 app.listen(PORT, HOST, () => {

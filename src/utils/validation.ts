@@ -1,25 +1,18 @@
-import { HolidayResponse } from "../models/holidayResponse.js";
-import { getPublicUkrainianHoildays } from "./workWithAPI.js";
-import HolidayRequestService from "../services/holidayRequestService.js";
-import EmployeeService from "../services/employeeService.js";
-import { employeeController } from "../controllers/employee.controller.js";
-import { holidayRequestController } from "../controllers/holidayRequest.controller.js";
+import HolidayRequest from "../models/holidayRequest";
+import { HolidayResponse } from "../models/holidayResponse";
+import { getPublicUkrainianHoildays } from "./workWithAPI";
+import HolidayRequestService from "../services/holidayRequestService";
+import EmployeeService from "../services/employeeService";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+
 const employeeService = new EmployeeService();
 
-export async function validateHolidayRequest(request: any): Promise<string | null>{ 
-  let errorMessage: string | null = null;
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-  const employeeId = parseInt(request.employeeId);
-  console.log("SELECTED DB " + selectedDatabase)
-  console.log("GET EMPLOYEE: " + await employeeController.getById(employeeId))
+let errorMessage: string | null;
 
-  const employee: any = selectedDatabase === 'postgres'
-    ? await employeeController.getById(employeeId)
-    : await employeeService.getById(request.employeeId!);
-  console.log('id = ' + parseInt(request.employeeId))
-  console.log("EMPLOYEE = " + employee)
+export async function validateHolidayRequest(request: HolidayRequest): Promise<string | null>{ 
+  errorMessage = null;
+  const employee = await employeeService.getById(request.employeeId!);
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate!);
   const endDate: Date = new Date(request.endDate!);
@@ -38,7 +31,6 @@ export async function validateHolidayRequest(request: any): Promise<string | nul
   }
 
   const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);
-  console.log("REMAINING HOLIDAYS " + employee.remainingHolidays!)
 
   if (totalDaysRequested > employee.remainingHolidays!) {
     errorMessage = 'Holiday request exceeds the maximum consecutive days allowed';
@@ -83,29 +75,18 @@ async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<
   }
 }
 
-async function hasAlreadyBookingInThisPeriod(request: any): Promise<boolean> {
+async function hasAlreadyBookingInThisPeriod(request: HolidayRequest): Promise<boolean> {
   const holidayRequestService = new HolidayRequestService();
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-  const employeeId = parseInt(request.employeeId);
-  const requests: any = selectedDatabase === 'postgres' 
-    ? await holidayRequestController.getArrayPendingRequestsByEmployeeId(employeeId)
-    : await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
-
-  for (const existingRequest of requests) {
-    if (existingRequest.id === request.id) {
-      continue;
-    }
-    if (
-      (request.startDate <= existingRequest.endDate) &&
-      (request.endDate >= existingRequest.startDate)
-    ) {
-      console.log('Date overlap detected.');
-      return true;
-    }
-  }
-
-  console.log('No overlapping dates were found.');
-  return false;
+  const requests: HolidayRequest[] = await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId!);
+  requests.forEach(existingRequest => {
+    if ((request.startDate! >= existingRequest.startDate! && request.startDate! <= existingRequest.endDate!) ||
+    (request.endDate! >= existingRequest.startDate! && request.endDate! <= existingRequest.endDate!) ||
+    (request.startDate! <= existingRequest.startDate! && request.endDate! >= existingRequest.endDate!))
+    {
+        return false;
+      }
+    });
+  return true;
 }
 
 export function getTotalDaysRequested(startDate: Date, endDate: Date){

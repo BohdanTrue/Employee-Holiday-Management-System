@@ -1,6 +1,6 @@
-import HolidayRequest from "../models/holidayRequest.js";
-import { collections } from "../utils/database.js";
-import { getTotalDaysRequested, validateHolidayRequest } from "../utils/validation.js";
+import HolidayRequest from "../models/holidayRequest";
+import { collections } from "../utils/database";
+import { getTotalDaysRequested, validateHolidayRequest } from "../utils/validation";
 import { ObjectId } from 'mongodb';
 
 export default class HolidayRequestService {
