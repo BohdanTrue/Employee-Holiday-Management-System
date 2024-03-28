@@ -14,11 +14,8 @@ const getAll = async () => {
   const holidayRequests = await holidayRequest.findAll();
   return holidayRequests;
 }
-
 async function add(name: string, startDate: Date, endDate: Date) {
-
-  const existingEmployee: any = await employee.findOne({ where: { name: name } });
-
+  const existingEmployee: any = await employee.findOne({ where: { name: name } });  
   if (!existingEmployee) {
     throw new Error(`Employee with name '${name}' does not exist.`);
   }
@@ -28,8 +25,7 @@ async function add(name: string, startDate: Date, endDate: Date) {
     startDate: startDate,
     endDate: endDate,
     status: 'pending'
-  };
-
+  };  
   const errorMessage = await validateHolidayRequest(newRequest);
 
   if (errorMessage === null) {
@@ -77,8 +73,7 @@ async function getArrayPendingRequestsByEmployeeId(employeeId: number) {
   try {
     const requests = await holidayRequest.findAll({
       where: {
-        employeeId: employeeId,
-        status: 'pending' || 'approve'
+        employeeId: employeeId
       }
     });
     return requests;

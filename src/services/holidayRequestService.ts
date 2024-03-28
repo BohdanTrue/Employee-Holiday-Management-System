@@ -10,7 +10,7 @@ export default class HolidayRequestService {
   }
 
   async getById(id: ObjectId): Promise<HolidayRequest> {
-    return await collections.requests?.find({_id: id}) as HolidayRequest;
+    return collections.requests?.find({ _id: id }) as unknown as HolidayRequest;
   }
   async getArrayPendingRequestsByEmployeeId(id: ObjectId): Promise<HolidayRequest[]> {
     return await collections.requests?.find({employeeId: id}).toArray() as HolidayRequest[];
@@ -37,9 +37,9 @@ export default class HolidayRequestService {
   }
 
   async updateStatus(id: ObjectId, status:String): Promise<void>{
-    const query = { _id: id };
+    const query = { _id: id };    
     await collections.requests?.updateOne(query, { $set: {status: status} });
-    const request = await collections.requests?.findOne(query) as HolidayRequest;
+    const request = await collections.requests?.findOne(query) as HolidayRequest;    
     if (status === 'rejected'){         
       const employee = await collections.employee?.findOne({_id: request.employeeId!});
       const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);

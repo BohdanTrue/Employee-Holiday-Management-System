@@ -10,7 +10,7 @@
   <% if (holidayRequests.length === 0) { %>
     <p>No holiday requests available.</p>
   <% } else { %>
-    <table style="float: left;">
+    <table style="float: left; border-collapse: collapse;">
       <thead>
         <tr>
           <th>Employee Name</th>
@@ -23,7 +23,7 @@
       <tbody>
         <% holidayRequests.forEach(request => {
             const employee = employees.find(employee => employee._id.equals(request.employeeId)); %>
-            <tr>
+            <tr style="border-bottom: 1pt solid black">
             <td><%= employee.name %></td>
             <td><%= request.startDate %></td>
             <td><%= request.endDate %></td>

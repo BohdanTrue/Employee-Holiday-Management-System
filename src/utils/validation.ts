@@ -12,6 +12,10 @@ export async function validateHolidayRequest(request: any): Promise<string | nul
   let errorMessage: string | null = null;
   const selectedDatabase = process.env.SELECTED_DATABASE;
   const employeeId = parseInt(request.employeeId);
+  console.log(request.employeeId);
+  
+  console.log(employeeId);
+  
 
   const employee: any = selectedDatabase === 'postgres'
     ? await employeeController.getById(employeeId)
@@ -82,15 +86,23 @@ async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<
 async function hasAlreadyBookingInThisPeriod(request: any): Promise<boolean> {
   const holidayRequestService = new HolidayRequestService();
   const selectedDatabase = process.env.SELECTED_DATABASE;
+  console.log(request.employeeId);  
   const employeeId = parseInt(request.employeeId);
-  const requests: any = selectedDatabase === 'postgres' 
+  const requests: any = selectedDatabase === 'postgres'
     ? await holidayRequestController.getArrayPendingRequestsByEmployeeId(employeeId)
     : await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
 
+  await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
   for (const existingRequest of requests) {
-    if (existingRequest.id === request.id) {
-      continue;
+    if (selectedDatabase === 'postgre'){
+      if (existingRequest.id === request.id) {
+        continue;
+      }
+    } else {
+      if (existingRequest._id === request._id){
+        continue;
     }
+  }
     if (
       (request.startDate <= existingRequest.endDate) &&
       (request.endDate >= existingRequest.startDate)
@@ -99,7 +111,6 @@ async function hasAlreadyBookingInThisPeriod(request: any): Promise<boolean> {
       return true;
     }
   }
-
   console.log('No overlapping dates were found.');
   return false;
 }

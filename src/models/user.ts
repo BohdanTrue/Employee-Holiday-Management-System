@@ -1,7 +1,8 @@
 import { ObjectId } from "mongodb";
 
-export default interface Employee {
+export default interface User {
     name: string,
-    remainingHolidays: number,
+    hash: string,
+    salt: string,
     _id: ObjectId,
 }

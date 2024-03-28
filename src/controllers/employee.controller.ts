@@ -17,14 +17,18 @@ const add = async (req: Request, res: Response) => {
 }
 
 const getAll = async (req: Request, res: Response) => {
-  return await employee.findAll();
+  const employees =  await employee.findAll();
+  console.log(employees);
+  
+  return employees;
+  
 }
 
 const getById = async(id: number) => {
   try {
     return await employee.findByPk(id);
   } catch (error) {
-    console.error('Error retrieving request by ID:', error);
+    console.error('Error retrieving employee by ID:', error);
     throw error;
   }
 }

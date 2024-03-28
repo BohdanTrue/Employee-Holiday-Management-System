@@ -41,13 +41,13 @@ requestRouter.post('/add-request', async (req, res) => {
   const endDate = new Date(req.body.endDate);
   const selectedDatabase = process.env.SELECTED_DATABASE;
 
-  const errorMessage = selectedDatabase === 'postgres' ? 
-    await holidayRequestController.add(name, startDate, endDate) :
-    await holidayRequestService.add(name, startDate, endDate);
+  const errorMessage = selectedDatabase === 'postgres' 
+  ? await holidayRequestController.add(name, startDate, endDate) 
+  : await holidayRequestService.add(name, startDate, endDate);
 
-  const employees = selectedDatabase === 'postgres' ?
-    await holidayRequestController.getAll() :
-    await employeeService.getAll();
+  const employees = selectedDatabase === 'postgres' 
+  ? await holidayRequestController.getAll() 
+  : await employeeService.getAll();
 
   if (errorMessage === null) {
     res.redirect('/requests');
@@ -58,13 +58,13 @@ requestRouter.post('/add-request', async (req, res) => {
 
 requestRouter.post('/approve-request/:id', async (req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
-  const id = parseInt(req.params.id);
-
   try {
     if (selectedDatabase === 'postgres') {
+      const id = parseInt(req.params.id);
       await holidayRequestController.updateStatus(id, 'approved');
     } else {
-      await holidayRequestService.updateStatus(new ObjectId(id), 'approved');
+      const id = new ObjectId(req.params.id);
+      await holidayRequestService.updateStatus(id, 'approved');
     }
     res.status(200).redirect('/requests');
   } catch (error) {
@@ -75,13 +75,12 @@ requestRouter.post('/approve-request/:id', async (req, res)  => {
 
 requestRouter.post('/reject-request/:id', async(req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
-  const id = parseInt(req.params.id);
-
   try {
     if (selectedDatabase === 'postgres') {
+      const id = parseInt(req.params.id);
       await holidayRequestController.updateStatus(id, 'rejected');
     } else {
-      await holidayRequestService.updateStatus(new ObjectId(id), 'rejected');
+      await holidayRequestService.updateStatus(new ObjectId(req.params.id), 'rejected');
     }
     res.status(200).redirect('/requests');
   } catch (error) {
@@ -92,13 +91,12 @@ requestRouter.post('/reject-request/:id', async(req, res)  => {
 
 requestRouter.post('/delete-request/:id', async(req, res) => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
-  const id = parseInt(req.params.id);
-
   try {
     if (selectedDatabase === 'postgres') {
+      const id = parseInt(req.params.id);
       await holidayRequestController.deleteRequest(id);
     } else {
-      await holidayRequestService.delete(new ObjectId(id));
+      await holidayRequestService.delete(new ObjectId(req.params.id));
     }
     res.redirect('/requests');
   } catch (error) {

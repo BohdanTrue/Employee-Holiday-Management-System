@@ -3,11 +3,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import employeeRouter from './src/routers/employeeRouter.js';
 import requestRouter from './src/routers/requestRouter.js';
+import authRouter from './src/routers/authRouter.js';
 import publicHolidayRouter from './src/routers/publicHolidayRouter.js';
 import { connectToDatabase } from './src/utils/database.js';
+import dotenv from 'dotenv';
 
-const PORT = 3033;
-const HOST = 'localhost';
+dotenv.config();
+const PORT: number = parseInt(process.env.PORT!);
+const HOST: string = process.env.HOST!;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +22,7 @@ app.set('views', path.join(__dirname, 'src', 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use('/', employeeRouter);
 app.use('/', requestRouter);
+app.use('/', authRouter);
 app.use('/public-holidays', publicHolidayRouter);
 
 app.get('/', (req, res) => res.status(200).render('index', { db: process.env.SELECTED_DATABASE }));
@@ -34,7 +38,7 @@ app.post('/set-database', (req, res) => {
   res.redirect('/');
 });
 
-app.listen(PORT, HOST, () => {
-  connectToDatabase();
+app.listen(PORT, HOST, async () => {
+ connectToDatabase();
   console.log(`Server started: http://${HOST}:${PORT}`);
 });
