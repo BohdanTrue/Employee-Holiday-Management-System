@@ -4,18 +4,19 @@ import HolidayRequestService from '../services/holidayRequestService.js';
 import EmployeeService from '../services/employeeService.js';
 import { holidayRequestController } from '../controllers/holidayRequest.controller.js';
 import { employeeController } from '../controllers/employee.controller.js';
-import { isAuth } from '../utils/authUtils.js';
+import { isAdmin, isAuth } from '../utils/authUtils.js';
+import { refreshMiddleware } from '../middlewares/refreshMiddleware.js';
 
 const requestRouter = express.Router();
 const holidayRequestService = new HolidayRequestService();
 const employeeService = new EmployeeService();
 
-requestRouter.get('/requests', async (req, res)  => {
+requestRouter.get('/requests', isAuth, refreshMiddleware, async (req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
 
   const employee: any = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
-    : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
+    ? await employeeController.getEmployeeByJwt(req.cookies.access_token) 
+    : await employeeService.getEmployeebyJwt(req.cookies.access_token);
     
   const holidayRequests = selectedDatabase === 'postgres' 
     ? await holidayRequestController.getArrayRequestsByEmployeeId(employee.id) 
@@ -26,20 +27,20 @@ const template = selectedDatabase === 'postgres' ? 'requestsForSQL' : 'requests'
 res.status(200).render(template, { holidayRequests, employee, access_token: req.cookies.access_token });
 });
 
-requestRouter.get('/add-request', isAuth, async(req, res)  => {
+requestRouter.get('/add-request', isAuth, refreshMiddleware, async(req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
 
   const employee = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
+    ? await employeeController.getEmployeeByJwt(req.cookies.access_token.token) 
     : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
 
   res.status(200).render('add-request', { employee, statusCode: res.statusCode} );
 });
 
-requestRouter.post('/add-request', async (req, res) => {
+requestRouter.post('/add-request', isAdmin, refreshMiddleware, async (req, res) => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
   const employee: any = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
+    ? await employeeController.getEmployeeByJwt(req.cookies.access_token.token) 
     : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
   const startDate = new Date(req.body.startDate);
   const endDate = new Date(req.body.endDate);
@@ -55,7 +56,7 @@ requestRouter.post('/add-request', async (req, res) => {
   }
 });
 
-requestRouter.post('/approve-request/:id', async (req, res)  => {
+requestRouter.post('/approve-request/:id', isAdmin, refreshMiddleware, async (req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
   try {
     if (selectedDatabase === 'postgres') {
@@ -72,7 +73,7 @@ requestRouter.post('/approve-request/:id', async (req, res)  => {
   }
 });
 
-requestRouter.post('/reject-request/:id', async(req, res)  => {
+requestRouter.post('/reject-request/:id', isAdmin, refreshMiddleware, async(req, res)  => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
   try {
     if (selectedDatabase === 'postgres') {
@@ -88,7 +89,7 @@ requestRouter.post('/reject-request/:id', async(req, res)  => {
   }
 });
 
-requestRouter.post('/delete-request/:id', async(req, res) => {
+requestRouter.post('/delete-request/:id', isAdmin, refreshMiddleware, async(req, res) => {
   const selectedDatabase = process.env.SELECTED_DATABASE;
   try {
     if (selectedDatabase === 'postgres') {
@@ -104,7 +105,7 @@ requestRouter.post('/delete-request/:id', async(req, res) => {
   }
 });
 
-requestRouter.get('/update-request/:id', isAuth, (req, res) => {
+requestRouter.get('/update-request/:id', isAuth, refreshMiddleware, (req, res) => {
   const id = req.params.id;
   res.status(200).render('update-request', { id });
 })

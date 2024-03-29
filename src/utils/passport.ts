@@ -15,17 +15,17 @@ const options: any = {
 
 export function ConfiguratePassport(passport: any){
   passport.use(new JwtStrategy(options, (jwt_payload: any, done: any) => {
-      var user;
-      console.log(jwt_payload);
-      if (process.env.SELECTED_DATABASE === 'mongo') {
-        user = collections.employee?.findOne({_id: jwt_payload.sub});
+    let user;
+    console.log(jwt_payload);
+    if (process.env.SELECTED_DATABASE === 'mongo') {
+      user = collections.employee?.findOne({_id: jwt_payload.sub});
+    } else {
+      user = employeeController.getById(jwt_payload.sub);
+    }
+      if (user) {
+        return done(null, user);
       } else {
-        user = employeeController.getById(jwt_payload.sub);
+        return done(null, false);
       }
-        if (user) {
-          return done(null, user);
-        } else {
-          return done(null, false);
-        }
-      }));              
+  }));
 };

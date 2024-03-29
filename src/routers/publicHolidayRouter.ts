@@ -1,9 +1,10 @@
 import express from 'express';
 import axios from 'axios';
+import { refreshMiddleware } from '../middlewares/refreshMiddleware.js';
 
 const publicHolidayRouter = express.Router();
 
-publicHolidayRouter.get('/', (req, res) => {
+publicHolidayRouter.get('/', refreshMiddleware, (req, res) => {
   res.render('public-holidays-form');
 });
 
@@ -17,7 +18,7 @@ publicHolidayRouter.post('/', async (req, res) => {
   }
 });
 
-publicHolidayRouter.get('/:year/:countryCode', async (req, res) => {
+publicHolidayRouter.get('/:year/:countryCode', refreshMiddleware, async (req, res) => {
   try {
     const { year, countryCode } = req.params;
 
