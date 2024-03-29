@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import Employee from '../models/employee.js';
 import { collections } from '../utils/database.js';
 import { genPassword, issueJWT, validPassword } from '../utils/passwordUtils.js';
-import { getIdfromJwt } from '../utils/authUtils.js';
+import { getEmployeeIdFromAccessToken } from '../utils/authUtils.js';
 
 export default class EmployeeService {
 
@@ -37,7 +37,7 @@ export default class EmployeeService {
     return await collections.employee?.findOne({ _id: id}) as Employee;
   }
 
-  async login(req: any, res: any){        
+  async login(req: any, res: any){
     const existingEmployee = await collections.employee?.findOne({ username: req.body.username })
     if (existingEmployee) {
       const isValid = validPassword(req.body.password, existingEmployee.hash, existingEmployee.salt);
@@ -59,7 +59,7 @@ export default class EmployeeService {
   }
 
   async getEmployeebyJwt(token:string){
-    const id: string = getIdfromJwt(token) as string; 
+    const id: string = getEmployeeIdFromAccessToken(token) as string; 
     return await this.getById(new ObjectId(id));
   }
 

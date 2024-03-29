@@ -1,7 +1,5 @@
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config'
 
 const client = new Sequelize({
   host: process.env.DB_HOST,

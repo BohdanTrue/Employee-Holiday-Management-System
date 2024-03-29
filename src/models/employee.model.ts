@@ -1,4 +1,4 @@
-import { DataTypes, STRING } from "sequelize";
+import { DataTypes } from "sequelize";
 import { client } from "../utils/db.config.js";
 
 export const employee = client.define('employee', {
